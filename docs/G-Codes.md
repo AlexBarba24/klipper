@@ -1003,18 +1003,23 @@ enabled.
 
 #### MANUAL_STEPPER
 `MANUAL_STEPPER STEPPER=config_name [ENABLE=[0|1]]
-[SET_POSITION=<pos>] [SPEED=<speed>] [ACCEL=<accel>] [MOVE=<pos>]
-[RETARGET=<pos>] [SYNC=0]]`: This command will alter the state of the stepper. Use the
-ENABLE parameter to enable/disable the stepper. Use the SET_POSITION
-parameter to force the stepper to think it is at the given
-position. Use the MOVE parameter to request a movement to the given
-position. If SPEED and/or ACCEL is specified then the given values
-will be used instead of the defaults specified in the config file. If
-an ACCEL of zero is specified then no acceleration will be
-performed. Normally future G-Code commands will be scheduled to run
-after the stepper move completes, however if a manual stepper move
-uses SYNC=0 then future G-Code movement commands may run in parallel
-with the stepper movement.
+[SET_POSITION=<pos>] [QUERY_POSITION=1] [SPEED=<speed>] [ACCEL=<accel>]
+[MOVE=<pos>] [RETARGET=<pos>] [SYNC=0]]`: This command will alter the
+state of the stepper. Use the ENABLE parameter to enable/disable the
+stepper. Use the SET_POSITION parameter to force the stepper to think
+it is at the given position. Use the QUERY_POSITION parameter to query
+the current physical position of the stepper (via an MCU
+`stepper_get_position` query). The reported position reflects steps
+already queued on the MCU (including mid-move progress) and does not
+include moves still pending on the host trapq pipeline. Use the MOVE
+parameter to request a movement to the given position. If SPEED
+and/or ACCEL is specified then the given values will be used instead
+of the defaults specified in the config file. If an ACCEL of zero is
+specified then no acceleration will be performed. Normally future
+G-Code commands will be scheduled to run after the stepper move
+completes, however if a manual stepper move uses SYNC=0 then future
+G-Code movement commands may run in parallel with the stepper
+movement.
 
 `MANUAL_STEPPER STEPPER=config_name [SPEED=<speed>] [ACCEL=<accel>]
 RETARGET=<pos>`: While a `MOVE` with `SYNC=0` is active, change the

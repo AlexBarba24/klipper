@@ -185,6 +185,18 @@ class MCU_stepper:
         return int(pos)
     def mcu_to_commanded_position(self, mcu_pos):
         return mcu_pos * self._step_dist - self._mcu_position_offset
+    def query_position(self):
+        # Query the MCU for the current physical stepper position. Unlike
+        # get_commanded_position(), this reflects steps already queued on the
+        # MCU (including mid-move progress) and does not include moves still
+        # pending on the host lookahead/trapq pipeline.
+        if self._mcu.is_fileoutput():
+            return self.get_commanded_position()
+        params = self._get_position_cmd.send([self._oid])
+        last_pos = params['pos']
+        if self._invert_dir:
+            last_pos = -last_pos
+        return self.mcu_to_commanded_position(last_pos)
     def dump_steps(self, count, start_clock, end_clock):
         ffi_main, ffi_lib = chelper.get_ffi()
         data = ffi_main.new('struct pull_history_steps[]', count)

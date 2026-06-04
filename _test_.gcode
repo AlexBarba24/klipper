@@ -1,8 +1,3 @@
-# Test case for manual_stepper
-CONFIG manual_stepper.cfg
-DICTIONARY atmega2560.dict
-
-# Test basic moves
 MANUAL_STEPPER STEPPER=basic_stepper ENABLE=1
 MANUAL_STEPPER STEPPER=basic_stepper SET_POSITION=0
 MANUAL_STEPPER STEPPER=basic_stepper MOVE=10 SPEED=10
@@ -10,52 +5,32 @@ MANUAL_STEPPER STEPPER=basic_stepper QUERY_POSITION=1
 MANUAL_STEPPER STEPPER=basic_stepper MOVE=5
 MANUAL_STEPPER STEPPER=basic_stepper MOVE=12 SPEED=12 ACCEL=9000.2
 MANUAL_STEPPER STEPPER=basic_stepper ENABLE=0
-
-# Test long move
 MANUAL_STEPPER STEPPER=basic_stepper MOVE=300 SPEED=10 ACCEL=2000
 MANUAL_STEPPER STEPPER=basic_stepper MOVE=100 SPEED=10 ACCEL=2000
-
-# Test RETARGET trapq splice on active SYNC=0 move
 MANUAL_STEPPER STEPPER=basic_stepper MOVE=120 SPEED=5 ACCEL=50 SYNC=0
 MANUAL_STEPPER STEPPER=basic_stepper QUERY_POSITION=1
 MANUAL_STEPPER STEPPER=basic_stepper RETARGET=200 SPEED=10 ACCEL=0
 MANUAL_STEPPER STEPPER=basic_stepper RETARGET=50 SPEED=8
-
-# Test phase-1 cancel responses: unsupported firmware / already idle / gcode axis reject
 MANUAL_STEPPER STEPPER=basic_stepper MOVE=120 SPEED=5 ACCEL=50 SYNC=0
 CANCEL_STEP STEPPER=basic_stepper
 MANUAL_STEPPER STEPPER=basic_stepper MOVE=2 SPEED=2
 CANCEL_STEP STEPPER=basic_stepper
-
-# Test homing move
 MANUAL_STEPPER STEPPER=homing_stepper ENABLE=1
 MANUAL_STEPPER STEPPER=homing_stepper SET_POSITION=0
 MANUAL_STEPPER STEPPER=homing_stepper MOVE=10 SPEED=100 ACCEL=1
 MANUAL_STEPPER STEPPER=homing_stepper ENABLE=0
-
-# Test motor off
 M84
-
-# Verify stepper_buzz
 STEPPER_BUZZ STEPPER="manual_stepper basic_stepper"
 STEPPER_BUZZ STEPPER="manual_stepper homing_stepper"
-
-# Register with g-code
 MANUAL_STEPPER STEPPER=basic_stepper GCODE_AXIS=A
 CANCEL_STEP STEPPER=basic_stepper
 G28
 G1 X20 Y20 Z10
 G1 A10 X22
-
-# Verify position query commands work with extra axis
 GET_POSITION
 M114
-
-# Test unregistering
 MANUAL_STEPPER STEPPER=basic_stepper GCODE_AXIS=
 G1 X15
-
-# Test registering again
 G28
 MANUAL_STEPPER STEPPER=basic_stepper GCODE_AXIS=A
 G1 X20 Y20 Z10  A20

@@ -127,6 +127,8 @@ class ManualStepper:
         self._clear_cancel_tracking("set_position")
         self.commanded_pos = setpos
         self.rail.set_position([self.commanded_pos, 0., 0.])
+    def do_query_position(self):
+        return self.steppers[0].query_position()
     def _set_cancel_state(self, new_state, reason):
         old_state = self.cancel_state
         if old_state == new_state:
@@ -475,12 +477,29 @@ class ManualStepper:
         self.sync_print_time()
     cmd_MANUAL_STEPPER_help = (
         "Command a manually configured stepper; RETARGET splices trapq motion")
+    def _check_query_only(self, gcmd):
+        if (gcmd.get_float('MOVE', None) is not None
+            or gcmd.get('STOP_ON_ENDSTOP', None) is not None
+            or gcmd.get_int('ENABLE', None) is not None
+            or gcmd.get_float('SET_POSITION', None) is not None
+            or gcmd.get_float('RETARGET', None) is not None
+            or gcmd.get_int('SYNC', 0)):
+            raise gcmd.error(
+                "QUERY_POSITION cannot be combined with MOVE, ENABLE, "
+                "SET_POSITION, RETARGET, STOP_ON_ENDSTOP, or SYNC")
     def cmd_MANUAL_STEPPER(self, gcmd):
         self._await_cancel_complete(gcmd, "MANUAL_STEPPER")
         if gcmd.get('GCODE_AXIS', None) is not None:
             return self.command_with_gcode_axis(gcmd)
         if self.axis_gcode_id is not None:
             raise gcmd.error("Must unregister from gcode axis first")
+        if gcmd.get_int('QUERY_POSITION', None) is not None:
+            self._check_query_only(gcmd)
+            pos = self.do_query_position()
+            stepper_name = self.name.split()[1]
+            gcmd.respond_info("Manual stepper %s: position=%.6f"
+                              % (stepper_name, pos))
+            return
         enable = gcmd.get_int('ENABLE', None)
         if enable is not None:
             self.do_enable(enable)
